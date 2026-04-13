@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPL Scores</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     WEEK CONFIG — edit this section each week
+     ============================================================ */
+
+  :root {
+    --accent: #8C1515;
+    --accent-light: #f9ecec;
+    --accent-dark: #651010;
+    --green: #3B6D11;
+    --green-light: #EAF3DE;
+    --red: #A32D2D;
+    --red-light: #FCEBEB;
+    --amber: #854F0B;
+    --amber-light: #FAEEDA;
+    --text: #1a1a18;
+    --text-muted: #6b6b67;
+    --border: rgba(0,0,0,0.1);
+    --bg: #f5f3ee;
+    --card: #ffffff;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 4rem;
+  }
+
+  header {
+    background: var(--text);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+
+  header .league {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  header h1 {
+    font-size: 26px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  header .date {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .notice {
+    background: var(--accent);
+    color: white;
+    font-size: 13px;
+    text-align: center;
+    padding: 10px 1rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .container {
+    max-width: 580px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 0;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .match-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .match-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--text);
+    color: white;
+    border-radius: 4px;
+    padding: 3px 8px;
+    letter-spacing: .04em;
+  }
+
+  .matchup-display {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .matchup-display strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .field-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b67' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+    margin-bottom: 1rem;
+  }
+
+  select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .result-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .rbtn {
+    padding: 9px 4px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: center;
+    transition: all .15s;
+    user-select: none;
+  }
+
+  .rbtn:hover { border-color: rgba(0,0,0,0.2); color: var(--text); }
+
+  .rbtn.win.active  { background: var(--green-light); border-color: var(--green); color: var(--green); }
+  .rbtn.loss.active { background: var(--red-light); border-color: var(--red); color: var(--red); }
+  .rbtn.forf.active { background: var(--amber-light); border-color: var(--amber); color: var(--amber); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+  .toggles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .tog-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .15s;
+  }
+
+  .tog-card.on { border-color: var(--green); background: var(--green-light); }
+  .tog-card.on .tog-label { color: var(--green); }
+
+  .tog-label { font-size: 13px; font-weight: 500; transition: color .15s; }
+
+  .pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .04em;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--border);
+    color: var(--text-muted);
+    transition: all .15s;
+  }
+
+  .tog-card.on .pill { background: var(--green); color: white; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    border-radius: var(--radius);
+    border: none;
+    background: var(--text);
+    color: white;
+    cursor: pointer;
+    margin-top: .5rem;
+    letter-spacing: .01em;
+    transition: opacity .15s;
+  }
+
+  .submit-btn:hover { opacity: .85; }
+  .submit-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .success-card {
+    display: none;
+    text-align: center;
+    padding: 2rem 1.5rem;
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+
+  .success-card .check {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--green-light);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 22px;
+  }
+
+  .success-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .success-card p { font-size: 13px; color: var(--text-muted); }
+
+  .error-msg {
+    display: none;
+    background: var(--red-light);
+    border: 1px solid var(--red);
+    color: var(--red);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-top: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .gossip-card {
+    background: var(--text);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .gossip-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .gossip-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .anon-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: white;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .gossip-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .gossip-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.07);
+    color: white;
+    resize: vertical;
+    min-height: 90px;
+    margin-bottom: 10px;
+  }
+
+  .gossip-textarea::placeholder { color: rgba(255,255,255,0.25); }
+  .gossip-textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+
+  .gossip-btn {
+    width: 100%;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    color: white;
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .gossip-btn:hover { background: rgba(255,255,255,0.14); }
+  .gossip-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .gossip-sent {
+    display: none;
+    text-align: center;
+    padding: .75rem;
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: rgba(255,255,255,0.5);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     WEEKLY CONFIG — update these two things each week:
+     1. WEEK_INFO (week number, date, deadline)
+     2. MATCHUPS (copy from the bracket image)
+     ============================================================ -->
+<script>
+const WEEK_INFO = {
+  number: 1,
+  date: "April 14, 2025",
+  deadline: "Wednesday, April 16"
+};
+
+// Each matchup: { table: N, team1: "Name", team2: "Name" }
+// Match 1 and Match 2 are listed separately
+const MATCHUPS = {
+  match1: [
+    { table: 1,  team1: "Unicorn Wranglers",           team2: "Guardians of the Patio" },
+    { table: 2,  team1: "Knights of Hennessy",          team2: "Stanford Pong Experiment" },
+    { table: 3,  team1: "SPAC Force",                   team2: "Trust Fund Babies" },
+    { table: 4,  team1: "Super Smash Hoes",             team2: "GGG: Girls, Gays and Grant" },
+    { table: 5,  team1: "C-Suite in Sweats",            team2: "Sink or Drink" },
+    { table: 6,  team1: "Porter's Five Courses",        team2: "Fieri's Flavortown Fiends" },
+    { table: 7,  team1: "Initial Pong Offer (IPO)",     team2: "Pong Friends 4 Life" },
+    { table: 8,  team1: "iPong",                        team2: "BBL Team" },
+    { table: 9,  team1: "Leathered Beer Outs",          team2: "Stanford Varsity Beer Pong" },
+    { table: 10, team1: "TBD (#17)",                    team2: "Coupa Troopa" },
+    { table: 11, team1: "Minions",                      team2: "TBD (#21)" },
+    { table: 12, team1: "academic opps",                team2: "TBD (#26)" },
+    { table: 13, team1: "Los Abuelitos",                team2: "Present & Accounted Pour" },
+  ],
+  match2: [
+    { table: 1,  team1: "Unicorn Wranglers",           team2: "Stanford Pong Experiment" },
+    { table: 2,  team1: "Knights of Hennessy",         team2: "Trust Fund Babies" },
+    { table: 3,  team1: "SPAC Force",                  team2: "GGG: Girls, Gays and Grant" },
+    { table: 4,  team1: "Guardians of the Patio",      team2: "Super Smash Hoes" },
+    { table: 5,  team1: "C-Suite in Sweats",           team2: "Fieri's Flavortown Fiends" },
+    { table: 6,  team1: "Sink or Drink",               team2: "Initial Pong Offer (IPO)" },
+    { table: 7,  team1: "Porter's Five Courses",       team2: "Pong Friends 4 Life" },
+    { table: 8,  team1: "iPong",                       team2: "Stanford Varsity Beer Pong" },
+    { table: 9,  team1: "BBL Team",                    team2: "Leathered Beer Outs" },
+    { table: 10, team1: "TBD (#17)",                   team2: "Minions" },
+    { table: 11, team1: "Coupa Troopa",                team2: "TBD (#21)" },
+    { table: 12, team1: "academic opps",               team2: "Los Abuelitos" },
+    { table: 13, team1: "TBD (#26)",                   team2: "Present & Accounted Pour" },
+  ]
+};
+
+// ============================================================
+// GOOGLE SHEETS — paste your Apps Script Web App URL here
+// ============================================================
+const SHEET_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
+// All teams (fixed — do not change week to week)
+const ALL_TEAMS = [
+  "academic opps","BBL Team","C-Suite in Sweats","Coupa Troopa",
+  "Fieri's Flavortown Fiends","GGG: Girls, Gays and Grant","Guardians of the Patio",
+  "Initial Pong Offer (IPO)","iPong","Knights of Hennessy","Leathered Beer Outs",
+  "Los Abuelitos","Minions","Pong Friends 4 Life","Porter's Five Courses",
+  "Present & Accounted Pour","Sink or Drink","SPAC Force","Stanford Pong Experiment",
+  "Stanford Varsity Beer Pong","Super Smash Hoes","TBD (#17)","TBD (#21)","TBD (#26)",
+  "Trust Fund Babies","Unicorn Wranglers"
+];
+</script>
+
+<!-- ============================================================
+     PAGE CONTENT — no need to edit below this line each week
+     ============================================================ -->
+
+<header>
+  <div class="league">Beer Pong League</div>
+  <h1 id="hdr-title">BPL Scores — Week ?</h1>
+</header>
+<div class="notice">Scores left unentered by Wednesday of this week will count as a forfeit for both teams (as we will assume that neither team showed up).</div>
+
+<div class="container">
+
+  <p class="section-label">Match 1</p>
+  <div class="card" id="card-m1">
+    <div class="field-label">Your team</div>
+    <select id="m1-team"></select>
+    <div id="m1-matchup" class="matchup-display" style="margin-bottom:1rem;display:none"></div>
+    <div class="result-label">Result — from your team's perspective</div>
+    <div class="result-grid" id="m1-results">
+      <button class="rbtn win"  data-val="Win 2-0">Win 2-0</button>
+      <button class="rbtn win"  data-val="Win 2-1">Win 2-1</button>
+      <button class="rbtn loss" data-val="Loss 0-2">Loss 0-2</button>
+      <button class="rbtn loss" data-val="Loss 1-2">Loss 1-2</button>
+      <button class="rbtn forf" data-val="Forfeit - Win">Forfeit W</button>
+      <button class="rbtn forf" data-val="Forfeit - Loss">Forfeit L</button>
+    </div>
+  </div>
+
+  <p class="section-label">Match 2</p>
+  <div class="card" id="card-m2">
+    <div class="field-label">Your team</div>
+    <select id="m2-team"></select>
+    <div id="m2-matchup" class="matchup-display" style="margin-bottom:1rem;display:none"></div>
+    <div class="result-label">Result — from your team's perspective</div>
+    <div class="result-grid" id="m2-results">
+      <button class="rbtn win"  data-val="Win 2-0">Win 2-0</button>
+      <button class="rbtn win"  data-val="Win 2-1">Win 2-1</button>
+      <button class="rbtn loss" data-val="Loss 0-2">Loss 0-2</button>
+      <button class="rbtn loss" data-val="Loss 1-2">Loss 1-2</button>
+      <button class="rbtn forf" data-val="Forfeit - Win">Forfeit W</button>
+      <button class="rbtn forf" data-val="Forfeit - Loss">Forfeit L</button>
+    </div>
+  </div>
+
+  <p class="section-label">Bonus</p>
+  <div class="card">
+    <div class="toggles-grid">
+      <div class="tog-card" id="tog-costume" onclick="toggleBonus('costume')">
+        <span class="tog-label">Costumes?</span>
+        <span class="pill" id="pill-costume">No</span>
+      </div>
+      <div class="tog-card" id="tog-patio" onclick="toggleBonus('patio')">
+        <span class="tog-label">Shut down patio?</span>
+        <span class="pill" id="pill-patio">No</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitScores()">Submit scores</button>
+  <div class="error-msg" id="error-msg"></div>
+
+  <div class="success-card" id="success-card">
+    <div class="check">✓</div>
+    <h2>Scores submitted!</h2>
+    <p>Good game. See you next week.</p>
+  </div>
+
+  <p class="section-label" style="margin-top:2rem">Anonymous gossip</p>
+  <div class="gossip-card">
+    <div class="gossip-header">
+      <span class="gossip-title">Spill the tea</span>
+      <span class="anon-badge">100% anonymous</span>
+    </div>
+    <p class="gossip-sub">Drama, highlights, hot takes — anything from tonight</p>
+    <textarea class="gossip-textarea" id="gossip-text" placeholder="Who embarrassed themselves? Any scandals? Best shot of the night?"></textarea>
+    <button class="gossip-btn" id="gossip-btn" onclick="submitGossip()">Send anonymously</button>
+    <div class="gossip-sent" id="gossip-sent">received. your secret is safe.</div>
+  </div>
+
+</div>
+
+<script>
+// Populate header
+document.getElementById('hdr-title').textContent = `BPL Scores — Week ${WEEK_INFO.number}`;
+
+
+// Build team selects
+function buildSelect(selId, matchupDivId, matchups) {
+  const sel = document.getElementById(selId);
+  const div = document.getElementById(matchupDivId);
+  sel.innerHTML = '<option value="">Select your team…</option>';
+  ALL_TEAMS.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t; o.textContent = t;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', () => {
+    const team = sel.value;
+    const match = matchups.find(m => m.team1 === team || m.team2 === team);
+    if (match) {
+      const opp = match.team1 === team ? match.team2 : match.team1;
+      div.innerHTML = `Table ${match.table} &nbsp;·&nbsp; <strong>${team}</strong> vs <strong>${opp}</strong>`;
+      div.style.display = 'block';
+    } else {
+      div.style.display = 'none';
+    }
+  });
+}
+
+buildSelect('m1-team', 'm1-matchup', MATCHUPS.match1);
+buildSelect('m2-team', 'm2-matchup', MATCHUPS.match2);
+
+// Result buttons
+document.querySelectorAll('.result-grid').forEach(grid => {
+  grid.querySelectorAll('.rbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      grid.querySelectorAll('.rbtn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+});
+
+// Bonus toggles
+const bonusState = { costume: false, patio: false };
+function toggleBonus(key) {
+  bonusState[key] = !bonusState[key];
+  const card = document.getElementById(`tog-${key}`);
+  const pill = document.getElementById(`pill-${key}`);
+  card.classList.toggle('on', bonusState[key]);
+  pill.textContent = bonusState[key] ? 'Yes' : 'No';
+}
+
+// Submit
+async function submitScores() {
+  const m1Team  = document.getElementById('m1-team').value;
+  const m2Team  = document.getElementById('m2-team').value;
+  const m1Res   = document.querySelector('#m1-results .active');
+  const m2Res   = document.querySelector('#m2-results .active');
+  const errEl   = document.getElementById('error-msg');
+
+  errEl.style.display = 'none';
+
+  if (!m1Team || !m1Res || !m2Team || !m2Res) {
+    errEl.textContent = 'Please select your team and result for both matches.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Find opponents from matchup config
+  const m1match = MATCHUPS.match1.find(m => m.team1 === m1Team || m.team2 === m1Team);
+  const m2match = MATCHUPS.match2.find(m => m.team1 === m2Team || m.team2 === m2Team);
+  const m1Opp = m1match ? (m1match.team1 === m1Team ? m1match.team2 : m1match.team1) : 'Unknown';
+  const m2Opp = m2match ? (m2match.team1 === m2Team ? m2match.team2 : m2match.team1) : 'Unknown';
+
+  const payload = {
+    week:      WEEK_INFO.number,
+    date:      WEEK_INFO.date,
+    m1_team:   m1Team,
+    m1_opp:    m1Opp,
+    m1_result: m1Res.dataset.val,
+    m2_team:   m2Team,
+    m2_opp:    m2Opp,
+    m2_result: m2Res.dataset.val,
+    costumes:  bonusState.costume ? 'Yes' : 'No',
+    patio:     bonusState.patio   ? 'Yes' : 'No',
+    timestamp: new Date().toISOString()
+  };
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Submitting…';
+
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    document.getElementById('success-card').style.display = 'block';
+    btn.style.display = 'none';
+  } catch (e) {
+    errEl.textContent = 'Submission failed — check your connection and try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Submit scores';
+  }
+}
+
+// Gossip submit
+async function submitGossip() {
+  const text = document.getElementById('gossip-text').value.trim();
+  if (!text) return;
+  const btn = document.getElementById('gossip-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  const payload = {
+    type: 'gossip',
+    week: WEEK_INFO.number,
+    gossip: text,
+    timestamp: new Date().toISOString()
+  };
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
+  document.getElementById('gossip-btn').style.display = 'none';
+  document.getElementById('gossip-text').style.display = 'none';
+  document.getElementById('gossip-sent').style.display = 'block';
+}
+</script>
+</body>
+</html>
