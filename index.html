@@ -375,50 +375,11 @@
 <body>
 
 <!-- ============================================================
-     WEEKLY CONFIG — update these two things each week:
-     1. WEEK_INFO (week number, date, deadline)
-     2. MATCHUPS (copy from the bracket image)
+     WEEKLY CONFIG — update the week number each week
      ============================================================ -->
 <script>
 const WEEK_INFO = {
-  number: 1,
-  date: "April 14, 2025",
-  deadline: "Wednesday, April 16"
-};
-
-// Each matchup: { table: N, team1: "Name", team2: "Name" }
-// Match 1 and Match 2 are listed separately
-const MATCHUPS = {
-  match1: [
-    { table: 1,  team1: "Unicorn Wranglers",           team2: "Guardians of the Patio" },
-    { table: 2,  team1: "Knights of Hennessy",          team2: "Stanford Pong Experiment" },
-    { table: 3,  team1: "SPAC Force",                   team2: "Trust Fund Babies" },
-    { table: 4,  team1: "Super Smash Hoes",             team2: "GGG: Girls, Gays and Grant" },
-    { table: 5,  team1: "C-Suite in Sweats",            team2: "Sink or Drink" },
-    { table: 6,  team1: "Porter's Five Courses",        team2: "Fieri's Flavortown Fiends" },
-    { table: 7,  team1: "Initial Pong Offer (IPO)",     team2: "Pong Friends 4 Life" },
-    { table: 8,  team1: "iPong",                        team2: "BBL Team" },
-    { table: 9,  team1: "Leathered Beer Outs",          team2: "Stanford Varsity Beer Pong" },
-    { table: 10, team1: "TBD (#17)",                    team2: "Coupa Troopa" },
-    { table: 11, team1: "Minions",                      team2: "TBD (#21)" },
-    { table: 12, team1: "academic opps",                team2: "TBD (#26)" },
-    { table: 13, team1: "Los Abuelitos",                team2: "Present & Accounted Pour" },
-  ],
-  match2: [
-    { table: 1,  team1: "Unicorn Wranglers",           team2: "Stanford Pong Experiment" },
-    { table: 2,  team1: "Knights of Hennessy",         team2: "Trust Fund Babies" },
-    { table: 3,  team1: "SPAC Force",                  team2: "GGG: Girls, Gays and Grant" },
-    { table: 4,  team1: "Guardians of the Patio",      team2: "Super Smash Hoes" },
-    { table: 5,  team1: "C-Suite in Sweats",           team2: "Fieri's Flavortown Fiends" },
-    { table: 6,  team1: "Sink or Drink",               team2: "Initial Pong Offer (IPO)" },
-    { table: 7,  team1: "Porter's Five Courses",       team2: "Pong Friends 4 Life" },
-    { table: 8,  team1: "iPong",                       team2: "Stanford Varsity Beer Pong" },
-    { table: 9,  team1: "BBL Team",                    team2: "Leathered Beer Outs" },
-    { table: 10, team1: "TBD (#17)",                   team2: "Minions" },
-    { table: 11, team1: "Coupa Troopa",                team2: "TBD (#21)" },
-    { table: 12, team1: "academic opps",               team2: "Los Abuelitos" },
-    { table: 13, team1: "TBD (#26)",                   team2: "Present & Accounted Pour" },
-  ]
+  number: 1
 };
 
 // ============================================================
@@ -443,7 +404,7 @@ const ALL_TEAMS = [
      ============================================================ -->
 
 <header>
-  <div class="league">Beer Pong League</div>
+  <div class="league">Beer Pong for Leaders</div>
   <h1 id="hdr-title">BPL Scores — Week ?</h1>
 </header>
 <div class="notice">Scores left unentered by Wednesday of this week will count as a forfeit for both teams (as we will assume that neither team showed up).</div>
@@ -454,7 +415,8 @@ const ALL_TEAMS = [
   <div class="card" id="card-m1">
     <div class="field-label">Your team</div>
     <select id="m1-team"></select>
-    <div id="m1-matchup" class="matchup-display" style="margin-bottom:1rem;display:none"></div>
+    <div class="field-label">Opponent</div>
+    <select id="m1-opp"></select>
     <div class="result-label">Result — from your team's perspective</div>
     <div class="result-grid" id="m1-results">
       <button class="rbtn win"  data-val="Win 2-0">Win 2-0</button>
@@ -470,7 +432,8 @@ const ALL_TEAMS = [
   <div class="card" id="card-m2">
     <div class="field-label">Your team</div>
     <select id="m2-team"></select>
-    <div id="m2-matchup" class="matchup-display" style="margin-bottom:1rem;display:none"></div>
+    <div class="field-label">Opponent</div>
+    <select id="m2-opp"></select>
     <div class="result-label">Result — from your team's perspective</div>
     <div class="result-grid" id="m2-results">
       <button class="rbtn win"  data-val="Win 2-0">Win 2-0</button>
@@ -523,32 +486,21 @@ const ALL_TEAMS = [
 // Populate header
 document.getElementById('hdr-title').textContent = `BPL Scores — Week ${WEEK_INFO.number}`;
 
-
-// Build team selects
-function buildSelect(selId, matchupDivId, matchups) {
+// Build team dropdowns
+function buildDropdown(selId, placeholder) {
   const sel = document.getElementById(selId);
-  const div = document.getElementById(matchupDivId);
-  sel.innerHTML = '<option value="">Select your team…</option>';
+  sel.innerHTML = `<option value="">${placeholder}</option>`;
   ALL_TEAMS.forEach(t => {
     const o = document.createElement('option');
     o.value = t; o.textContent = t;
     sel.appendChild(o);
   });
-  sel.addEventListener('change', () => {
-    const team = sel.value;
-    const match = matchups.find(m => m.team1 === team || m.team2 === team);
-    if (match) {
-      const opp = match.team1 === team ? match.team2 : match.team1;
-      div.innerHTML = `Table ${match.table} &nbsp;·&nbsp; <strong>${team}</strong> vs <strong>${opp}</strong>`;
-      div.style.display = 'block';
-    } else {
-      div.style.display = 'none';
-    }
-  });
 }
 
-buildSelect('m1-team', 'm1-matchup', MATCHUPS.match1);
-buildSelect('m2-team', 'm2-matchup', MATCHUPS.match2);
+buildDropdown('m1-team', 'Select your team…');
+buildDropdown('m1-opp',  'Select opponent…');
+buildDropdown('m2-team', 'Select your team…');
+buildDropdown('m2-opp',  'Select opponent…');
 
 // Result buttons
 document.querySelectorAll('.result-grid').forEach(grid => {
@@ -573,28 +525,24 @@ function toggleBonus(key) {
 // Submit
 async function submitScores() {
   const m1Team  = document.getElementById('m1-team').value;
+  const m1Opp   = document.getElementById('m1-opp').value;
   const m2Team  = document.getElementById('m2-team').value;
+  const m2Opp   = document.getElementById('m2-opp').value;
   const m1Res   = document.querySelector('#m1-results .active');
   const m2Res   = document.querySelector('#m2-results .active');
   const errEl   = document.getElementById('error-msg');
 
   errEl.style.display = 'none';
 
-  if (!m1Team || !m1Res || !m2Team || !m2Res) {
-    errEl.textContent = 'Please select your team and result for both matches.';
+  if (!m1Team || !m1Opp || !m1Res || !m2Team || !m2Opp || !m2Res) {
+    errEl.textContent = 'Please select your team, opponent, and result for both matches.';
     errEl.style.display = 'block';
     return;
   }
 
-  // Find opponents from matchup config
-  const m1match = MATCHUPS.match1.find(m => m.team1 === m1Team || m.team2 === m1Team);
-  const m2match = MATCHUPS.match2.find(m => m.team1 === m2Team || m.team2 === m2Team);
-  const m1Opp = m1match ? (m1match.team1 === m1Team ? m1match.team2 : m1match.team1) : 'Unknown';
-  const m2Opp = m2match ? (m2match.team1 === m2Team ? m2match.team2 : m2match.team1) : 'Unknown';
-
   const payload = {
     week:      WEEK_INFO.number,
-    date:      WEEK_INFO.date,
+    date:      new Date().toLocaleDateString('en-US'),
     m1_team:   m1Team,
     m1_opp:    m1Opp,
     m1_result: m1Res.dataset.val,
