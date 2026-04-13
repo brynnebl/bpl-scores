@@ -379,7 +379,8 @@
      ============================================================ -->
 <script>
 const WEEK_INFO = {
-  number: 1
+  number: 1,
+  date: "April 14"
 };
 
 // ============================================================
@@ -484,7 +485,7 @@ const ALL_TEAMS = [
 
 <script>
 // Populate header
-document.getElementById('hdr-title').textContent = `BPL Scores — Week ${WEEK_INFO.number}`;
+document.getElementById('hdr-title').textContent = `BPL Scores — Week ${WEEK_INFO.number} (${WEEK_INFO.date})`;
 
 // Build team dropdowns
 function buildDropdown(selId, placeholder) {
