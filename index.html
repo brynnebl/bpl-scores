@@ -379,14 +379,13 @@
      ============================================================ -->
 <script>
 const WEEK_INFO = {
-  number: 1,
-  date: "April 14"
+  number: 1
 };
 
 // ============================================================
 // GOOGLE SHEETS — paste your Apps Script Web App URL here
 // ============================================================
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyUAOhjYCmUhs7qZADsHi_tFzPaEJqJ2Aj3b6qonIosWfeEQFhArats2pqQwYo1sXG1/exec";
+const SHEET_URL = "YOUR_APPS_SCRIPT_URL_HERE";
 
 // All teams (fixed — do not change week to week)
 const ALL_TEAMS = [
@@ -476,7 +475,7 @@ const ALL_TEAMS = [
       <span class="anon-badge">100% anonymous</span>
     </div>
     <p class="gossip-sub">Drama, highlights, hot takes — anything from tonight</p>
-    <textarea class="gossip-textarea" id="gossip-text" placeholder="Any scandals? Best shot of the night?"></textarea>
+    <textarea class="gossip-textarea" id="gossip-text" placeholder="Who embarrassed themselves? Any scandals? Best shot of the night?"></textarea>
     <button class="gossip-btn" id="gossip-btn" onclick="submitGossip()">Send anonymously</button>
     <div class="gossip-sent" id="gossip-sent">received. your secret is safe.</div>
   </div>
@@ -485,7 +484,7 @@ const ALL_TEAMS = [
 
 <script>
 // Populate header
-document.getElementById('hdr-title').textContent = `BPL Scores — Week ${WEEK_INFO.number} (${WEEK_INFO.date})`;
+document.getElementById('hdr-title').textContent = `BPL Scores — Week ${WEEK_INFO.number}`;
 
 // Build team dropdowns
 function buildDropdown(selId, placeholder) {
@@ -502,6 +501,12 @@ buildDropdown('m1-team', 'Select your team…');
 buildDropdown('m1-opp',  'Select opponent…');
 buildDropdown('m2-team', 'Select your team…');
 buildDropdown('m2-opp',  'Select opponent…');
+
+// Auto-carry team selection from Match 1 to Match 2
+document.getElementById('m1-team').addEventListener('change', function() {
+  const m2 = document.getElementById('m2-team');
+  if (this.value) m2.value = this.value;
+});
 
 // Result buttons
 document.querySelectorAll('.result-grid').forEach(grid => {
