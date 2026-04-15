@@ -384,18 +384,26 @@ const WEEK_INFO = {
 };
 
 // ============================================================
+// WEEKLY SCHEDULE — replace with new URL each week
+// Upload screenshot to your GitHub repo or Google Drive
+// and paste the direct image link here
+// ============================================================
+const SCHEDULE_URL = "https://docs.google.com/spreadsheets/d/1cSnv1YBhdZ3c5zePyWK50Yqp7uTENOcv5_dPuQf2H7M/edit?usp=sharing";
+
+// ============================================================
 // GOOGLE SHEETS — paste your Apps Script Web App URL here
 // ============================================================
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxJ6tudNqgBl2fjipMshxGnOxTd6abwE5faa2cMRSvxamnM75SbHK-TTbV15HS5Ro79/exec";
 
 // All teams (fixed — do not change week to week)
 const ALL_TEAMS = [
-  "academic opps","BBL Team","C-Suite in Sweats","Coupa Troopa",
-  "Fieri's Flavortown Fiends","GGG: Girls, Gays and Grant","Guardians of the Patio",
+  "academic opps","BBL Team","Beer Pressure","C-Suite in Sweats",
+  "Code Brew","Coupa Troopa (reigning CAMPEÓNES)","Dos Equity","Fieri's Flavortown Fiends",
+  "GGG: Girls, Gays and Grant","Guardians of the Patio","I Need a Job",
   "Initial Pong Offer (IPO)","iPong","Knights of Hennessy","Leathered Beer Outs",
   "Los Abuelitos","Minions","Pong Friends 4 Life","Porter's Five Courses",
-  "Present & Accounted Pour","Sink or Drink","SPAC Force","Stanford Pong Experiment",
-  "Stanford Varsity Beer Pong","Super Smash Hoes","TBD (#17)","TBD (#21)","TBD (#26)",
+  "Present & Accounted Pour","sink-182","Sink or Drink","SPAC Force",
+  "Stanford Pong Experiment","Stanford Varsity Beer Pong","Super Smash Hoes",
   "Trust Fund Babies","Unicorn Wranglers"
 ];
 </script>
@@ -405,12 +413,19 @@ const ALL_TEAMS = [
      ============================================================ -->
 
 <header>
-  <div class="league">Beer Pong for Leaders</div>
+  <div class="league">Beer Pong League</div>
   <h1 id="hdr-title">BPL Scores — Week ?</h1>
 </header>
-<div class="notice">Scores left unentered by Wednesday will count as a forfeit. Please only submit one score per team per week. However, submit as many anonymous pieces of gossip as you'd like. </div>
+<div class="notice">Scores left unentered by Wednesday will count as a forfeit. Please only submit one score per team per week. However, submit as many anonymous pieces of gossip as you'd like.</div>
 
 <div class="container">
+
+  <div id="schedule-section" style="display:none;margin-bottom:1.25rem">
+    <p class="section-label">This week's schedule</p>
+    <div style="background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;">
+      <a href="" id="schedule-link" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:13px;font-weight:500;">View this week's schedule →</a>
+    </div>
+  </div>
 
   <p class="section-label">Match 1</p>
   <div class="card" id="card-m1">
@@ -429,9 +444,10 @@ const ALL_TEAMS = [
     </div>
   </div>
 
-<p class="section-label">Match 2</p>
+  <p class="section-label">Match 2</p>
   <div class="card" id="card-m2">
-    <select id="m2-team" style="display:none;"></select>
+    <div class="field-label">Your team</div>
+    <select id="m2-team"></select>
     <div class="field-label">Opponent</div>
     <select id="m2-opp"></select>
     <div class="result-label">Result — from your team's perspective</div>
@@ -469,13 +485,16 @@ const ALL_TEAMS = [
   </div>
 
   <p class="section-label" style="margin-top:2rem">Anonymous gossip</p>
+  <div style="background:var(--accent-light);border-radius:var(--radius);border:1px solid var(--accent);padding:10px 14px;margin-bottom:10px;">
+    <p style="font-size:12px;color:var(--accent-dark);font-family:'DM Mono',monospace;line-height:1.6;">This section is submitted completely separately from your score — no team name, no identifying info, nothing. We literally cannot tell who sent it. So pop off.</p>
+  </div>
   <div class="gossip-card">
     <div class="gossip-header">
       <span class="gossip-title">Spill the tea</span>
       <span class="anon-badge">100% anonymous</span>
     </div>
     <p class="gossip-sub">Drama, highlights, hot takes — anything from tonight</p>
-    <textarea class="gossip-textarea" id="gossip-text" placeholder="Any scandals? Best shot of the night?"></textarea>
+    <textarea class="gossip-textarea" id="gossip-text" placeholder="Who embarrassed themselves? Any scandals? Best shot of the night?"></textarea>
     <button class="gossip-btn" id="gossip-btn" onclick="submitGossip()">Send anonymously</button>
     <div class="gossip-sent" id="gossip-sent">received. your secret is safe.</div>
   </div>
@@ -485,6 +504,12 @@ const ALL_TEAMS = [
 <script>
 // Populate header
 document.getElementById('hdr-title').textContent = `BPL Scores — Week ${WEEK_INFO.number} (${WEEK_INFO.date})`;
+
+// Show schedule url
+if (SCHEDULE_URL && SCHEDULE_URL.trim() !== '') {
+  document.getElementById('schedule-link').href = SCHEDULE_URL;
+  document.getElementById('schedule-section').style.display = 'block';
+}
 
 // Build team dropdowns
 function buildDropdown(selId, placeholder) {
