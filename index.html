@@ -576,11 +576,24 @@ async function submitScores() {
 
   errEl.style.display = 'none';
 
-  if (!m1Team || !m1Opp || !m1Res || !m2Team || !m2Opp || !m2Res) {
-    errEl.textContent = 'Please select your team, opponent, and result for both matches.';
-    errEl.style.display = 'block';
-    return;
-  }
+const m1IsBye = m1Res && m1Res.dataset.val === 'Bye';
+const m2IsBye = m2Res && m2Res.dataset.val === 'Bye';
+
+if (!m1Team || !m1Res || !m2Team || !m2Res) {
+  errEl.textContent = 'Please select your team and result for both matches.';
+  errEl.style.display = 'block';
+  return;
+}
+if (!m1IsBye && !m1Opp) {
+  errEl.textContent = 'Please select an opponent for Match 1.';
+  errEl.style.display = 'block';
+  return;
+}
+if (!m2IsBye && !m2Opp) {
+  errEl.textContent = 'Please select an opponent for Match 2.';
+  errEl.style.display = 'block';
+  return;
+}
 
   const payload = {
     week:      WEEK_INFO.number,
