@@ -448,8 +448,9 @@ const ALL_TEAMS = [
 
   <p class="section-label">Match 2</p>
   <div class="card" id="card-m2">
-    <div class="field-label">Your team</div>
-    <select id="m2-team"></select>
+   <div class="field-label">Your team</div>
+    <div id="m2-team-display" style="font-size:14px;font-weight:500;color:var(--text);padding:10px 12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);margin-bottom:1rem;">—</div>
+    <select id="m2-team" style="display:none;"></select>
     <div class="field-label">Opponent</div>
     <select id="m2-opp"></select>
     <div class="result-label">Result — from your team's perspective</div>
@@ -533,7 +534,14 @@ buildDropdown('m2-opp',  'Select opponent…');
 // Auto-carry team selection from Match 1 to Match 2
 document.getElementById('m1-team').addEventListener('change', function() {
   const m2 = document.getElementById('m2-team');
-  if (this.value) m2.value = this.value;
+  const m2display = document.getElementById('m2-team-display');
+  if (this.value) {
+    m2.value = this.value;
+    m2display.textContent = this.value;
+  } else {
+    m2.value = '';
+    m2display.textContent = '—';
+  }
 });
 
 // Result buttons
